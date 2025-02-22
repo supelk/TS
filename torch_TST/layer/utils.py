@@ -1,12 +1,12 @@
 # 作者: ZY
 # @Time:2025/1/5 14:24
 # way down we go
-__all__ =  ['masked_mape_loss','r2_score','EarlyStopCallback','plot_learning_curves','wavelet_denoise_high_freq','plot_list','show_labelperdict']
+__all__ =  ['mape_loss','r2_score','EarlyStopCallback','plot_learning_curves','wavelet_denoise_high_freq','plot_list','show_labelperdict']
 import torch
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-def masked_mape_loss(y_pred, y_true):
+def mape_loss(y_pred, y_true):
     loss = torch.abs(torch.div(y_true - y_pred, y_true)) * 100
     return loss.mean()
 def r2_score(y_true, y_pred):

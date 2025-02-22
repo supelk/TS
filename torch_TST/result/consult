@@ -1,0 +1,4 @@
+wavelet+Patch  40epoch  mse 974 mape 82
+lstm                        1675     78
+transformer          1670            78.3
+GRU                      1851       77.5

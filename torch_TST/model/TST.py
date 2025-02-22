@@ -8,7 +8,7 @@ from typing import Optional
 import torch.nn.functional as F
 import numpy as np
 import math
-from layer.RevIN import RevIN
+from torch_TST.layer.RevIN import RevIN
 bs = 16
 n_heads = 8
 max_q_len = 7 * 24
@@ -312,7 +312,7 @@ class PatchTST_backbone(nn.Module):
     """
     def __init__(self, c_in: int, context_window: int, target_window: int, patch_len: int, stride: int,
                  max_seq_len: Optional[int] = 1024,
-                 n_layers: int = 4, d_model=128, n_heads=8, d_k: Optional[int] = None, d_v: Optional[int] = None,
+                 n_layers: int = 32, d_model=128, n_heads=8, d_k: Optional[int] = None, d_v: Optional[int] = None,
                  d_ff: int = 256, norm: str = 'BatchNorm', attn_dropout: float = 0., dropout: float = 0.,
                  act: str = "gelu", key_padding_mask: bool = 'auto',
                  padding_var: Optional[int] = None, attn_mask: Optional[Tensor] = None, res_attention: bool = True,
@@ -394,16 +394,15 @@ class TSL(nn.Module):
     TS ->(bs,c_in,output_len)
     return (bs,output_len,c_in)
     """
-    def __init__(self,c_in,input_len,output_len,L_nums):
+    def __init__(self,c_in,input_len,output_len):
         super().__init__()
         self.TS = PatchTST_backbone(c_in=c_in,context_window=input_len,target_window=output_len,patch_len=output_len,stride=8)
-        self.L = nn.LSTM(input_size=c_in,hidden_size=c_in,num_layers=L_nums,batch_first=True)
 
     def forward(self,x):
         x = x.permute(0,2,1)
         x = self.TS(x)
         x = x.permute(0,2,1)
-        x,_ = self.L(x)
+        x = x[:,:,0].unsqueeze(-1)
         return x
 
 
@@ -441,9 +440,16 @@ def test_PatchTST_backbone(bs,c_in,seq_len):
     y = Patchbone(x)
     print("x.shape:", x.shape)
     print("output.shape:", y.shape)
+def test_TSL(bs,c_in,input_len,output_len,L_num):
+    model = TSL(c_in=c_in,input_len=input_len,output_len=output_len,L_nums=L_num)
+    x = torch.rand(bs, seq_len, c_in)
+    y = model(x)
+    print("x.shape:", x.shape)
+    print("output.shape:", y.shape)
 # test_scladdotproductattention(bs,n_heads,max_q_len,d_model,seq_len,key_padding_mask,attn_mask)
 # test_multiheadattention(bs,n_heads,max_q_len,d_model,seq_len,key_padding_mask,attn_mask)
 # test_TSTEncoderLayer(bs,n_heads,max_q_len,d_model,seq_len,key_padding_mask,attn_mask)
 # test_TSTEncoder(bs,n_heads,max_q_len,d_model,seq_len,key_padding_mask,attn_mask)
 # test_TSTiEncoder(bs,c_in,patch_len,patch_num)
 # test_PatchTST_backbone(bs,c_in,seq_len)
+# test_TSL(bs,c_in,seq_len,patch_len,2)
