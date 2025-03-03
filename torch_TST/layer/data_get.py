@@ -19,6 +19,7 @@ def give_me_dataloader(df,input_len,output_len):
     test_set = TSDataset(test_df, input_len=input_len, output_len=output_len)
     train_loader = DataLoader(train_set, batch_size=32, shuffle=True)
     test_loader = DataLoader(test_set, batch_size=1, shuffle=False)
+    return  train_loader,test_loader
 def give_me_wavelet_dataloader(df,input_len,output_len):
     """ df为原数据，内部包含小波降噪"""
     train_len = int(df.shape[0]*0.8)
@@ -47,7 +48,7 @@ def prepare_data(data_x,data_y,win_size, target_feature_idx, forecast_horizon=24
 from torch.utils.data import Dataset, DataLoader
 class   TSDataset(Dataset):
     """" data to input,output，多to单 """
-    def __init__(self, data, input_len, output_len, CI):
+    def __init__(self, data, input_len, output_len):
         self.x = data
         # self.revin_layer = RevIN(CI,)
         self.input_len = input_len

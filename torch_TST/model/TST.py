@@ -9,6 +9,7 @@ import torch.nn.functional as F
 import numpy as np
 import math
 from torch_TST.layer.RevIN import RevIN
+
 bs = 16
 n_heads = 8
 max_q_len = 7 * 24
@@ -391,7 +392,7 @@ class PatchTST_backbone(nn.Module):
 
 class TSL(nn.Module):
     """
-    TS ->(bs,c_in,output_len)
+    TS ->(bs,input_len,ouputdim==1)
     return (bs,output_len,c_in)
     """
     def __init__(self,c_in,input_len,output_len):
@@ -404,7 +405,6 @@ class TSL(nn.Module):
         x = x.permute(0,2,1)
         x = x[:,:,0].unsqueeze(-1)
         return x
-
 
 def test_scladdotproductattention(bs,n_heads,max_q_len,d_model,seq_len,key_padding_mask,attn_mask):
     q = torch.rand(bs, n_heads, max_q_len, d_model)
@@ -440,8 +440,8 @@ def test_PatchTST_backbone(bs,c_in,seq_len):
     y = Patchbone(x)
     print("x.shape:", x.shape)
     print("output.shape:", y.shape)
-def test_TSL(bs,c_in,input_len,output_len,L_num):
-    model = TSL(c_in=c_in,input_len=input_len,output_len=output_len,L_nums=L_num)
+def test_TSL(bs,c_in,input_len,output_len):
+    model = TSL(c_in=c_in,input_len=input_len,output_len=output_len)
     x = torch.rand(bs, seq_len, c_in)
     y = model(x)
     print("x.shape:", x.shape)
@@ -452,4 +452,4 @@ def test_TSL(bs,c_in,input_len,output_len,L_num):
 # test_TSTEncoder(bs,n_heads,max_q_len,d_model,seq_len,key_padding_mask,attn_mask)
 # test_TSTiEncoder(bs,c_in,patch_len,patch_num)
 # test_PatchTST_backbone(bs,c_in,seq_len)
-# test_TSL(bs,c_in,seq_len,patch_len,2)
+# test_TSL(bs,c_in,seq_len,patch_len)
